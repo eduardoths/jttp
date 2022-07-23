@@ -85,7 +85,7 @@ func TestMux_Search(t *testing.T) {
 		want    Handler
 	}
 
-	var secondTestWantFunc = func() {}
+	var wantFunc = func() {}
 	testCases := []testCase{
 		{
 			it:      "Should return not found handler",
@@ -95,10 +95,21 @@ func TestMux_Search(t *testing.T) {
 		{
 			it: "Sould return the same handler",
 			inserts: []inserts{
-				{http.MethodPost, "/", secondTestWantFunc},
+				{http.MethodPost, "/", wantFunc},
 			},
 			in:   input{http.MethodPost, "/"},
-			want: secondTestWantFunc,
+			want: wantFunc,
+		},
+		{
+			it: "Sould return the correct handler among similar routes",
+			inserts: []inserts{
+				{http.MethodPost, "/", func() {}},
+				{http.MethodGet, "/", func() {}},
+				{http.MethodPut, "/", func() {}},
+				{http.MethodPatch, "/", wantFunc},
+			},
+			in:   input{http.MethodPatch, "/"},
+			want: wantFunc,
 		},
 	}
 
