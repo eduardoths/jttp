@@ -124,6 +124,33 @@ func TestTrie_Insert(t *testing.T) {
 				Value:      nil,
 			},
 		},
+		{
+			it: "should have a terminal children for 't' and one for 'te' if it inserts t before te",
+			in: []args{
+				{[]rune("t"), 4321},
+				{[]rune("te"), 1234},
+			},
+			want: &datastructures.TrieNode[rune, int]{
+				Children: map[rune]*datastructures.TrieNode[rune, int]{
+					't': {
+						Children: map[rune]*datastructures.TrieNode[rune, int]{
+							'e': {
+								Children:   make(map[rune]*datastructures.TrieNode[rune, int]),
+								IsTerminal: true,
+								Key:        'e',
+								Value:      pointy.Int(1234),
+							},
+						},
+						IsTerminal: true,
+						Key:        't',
+						Value:      pointy.Int(4321),
+					},
+				},
+				IsTerminal: false,
+				Key:        rune(0),
+				Value:      nil,
+			},
+		},
 	}
 
 	for _, scenario := range testCases {
