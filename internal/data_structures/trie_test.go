@@ -138,3 +138,75 @@ func TestTrie_Insert(t *testing.T) {
 	}
 
 }
+
+func TestTrie_Find(t *testing.T) {
+	type insert struct {
+		key   []rune
+		value int
+	}
+
+	type testCase struct {
+		it     string
+		insert []insert
+		in     []rune
+		want   *datastructures.TrieNode[rune, int]
+	}
+
+	testCases := []testCase{
+		{
+			it:     "Should return nil struct if key is no found",
+			in:     []rune("looking for a string"),
+			insert: []insert{},
+			want:   nil,
+		},
+		{
+			it:     "Should find terminal children for 't'",
+			in:     []rune("t"),
+			insert: []insert{{[]rune{'t'}, 123}},
+			want: &datastructures.TrieNode[rune, int]{
+				Children:   make(map[rune]*datastructures.TrieNode[rune, int]),
+				IsTerminal: true,
+				Key:        't',
+				Value:      pointy.Int(123),
+			},
+		},
+		{
+			it:     "Should find terminal children for 'test1'",
+			in:     []rune("test1"),
+			insert: []insert{{[]rune("test1"), 321}},
+			want: &datastructures.TrieNode[rune, int]{
+				Children:   make(map[rune]*datastructures.TrieNode[rune, int]),
+				IsTerminal: true,
+				Key:        '1',
+				Value:      pointy.Int(321),
+			},
+		},
+		{
+			it:     "Should find a non-terminal children for 'xpto'",
+			in:     []rune("xpto"),
+			insert: []insert{{[]rune("xpto1"), 1}},
+			want: &datastructures.TrieNode[rune, int]{
+				Children: map[rune]*datastructures.TrieNode[rune, int]{
+					'1': {
+						Children:   make(map[rune]*datastructures.TrieNode[rune, int]),
+						IsTerminal: true,
+						Key:        '1',
+						Value:      pointy.Int(1),
+					},
+				},
+				IsTerminal: false,
+				Key:        'o',
+			},
+		},
+	}
+	for _, scenario := range testCases {
+		t.Run(scenario.it, func(t *testing.T) {
+			root := datastructures.NewTrie[rune, int](rune(0), nil)
+			for _, insert := range scenario.insert {
+				root.Insert(insert.key, insert.value)
+			}
+			actual := root.Find(scenario.in)
+			assert.Equal(t, scenario.want, actual)
+		})
+	}
+}
