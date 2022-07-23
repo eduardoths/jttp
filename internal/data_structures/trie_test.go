@@ -10,35 +10,36 @@ import (
 
 func TestTrie(t *testing.T) {
 	type TestCase struct {
-		before func(t *testing.T, tn *datastructures.TrieNode[rune, int])
-		assert func(t *testing.T, tn *datastructures.TrieNode[rune, int])
+		args   [][]rune
+		before func(t *testing.T, tn *datastructures.TrieNode[rune, int], args ...[]rune)
+		assert func(t *testing.T, tn *datastructures.TrieNode[rune, int], args ...[]rune)
 	}
 
 	testCases := map[string]TestCase{
 		"it should find test": {
-			before: func(t *testing.T, tn *datastructures.TrieNode[rune, int]) {
-				test := []rune("test")
-				tn.Insert(test, 321)
+			args: [][]rune{[]rune("test")},
+			before: func(t *testing.T, tn *datastructures.TrieNode[rune, int], args ...[]rune) {
+				tn.Insert(args[0], 321)
 			},
-			assert: func(t *testing.T, tn *datastructures.TrieNode[rune, int]) {
-				test := []rune("test")
-				v := tn.Find(test)
+			assert: func(t *testing.T, tn *datastructures.TrieNode[rune, int], args ...[]rune) {
+				v := tn.Find(args[0])
+				lastKey := args[0][len(args[0])-1]
 				want := &datastructures.TrieNode[rune, int]{
 					Children:   make(map[rune]*datastructures.TrieNode[rune, int]),
 					IsTerminal: true,
-					Key:        't',
+					Key:        lastKey,
 					Value:      pointy.Int(321),
 				}
 				assert.Equal(t, want, v)
 			},
 		},
 		"it should find subparts of test": {
-			before: func(t *testing.T, tn *datastructures.TrieNode[rune, int]) {
-				test := []rune("test")
-				tn.Insert(test, 1234)
+			args: [][]rune{[]rune("test")},
+			before: func(t *testing.T, tn *datastructures.TrieNode[rune, int], args ...[]rune) {
+				tn.Insert(args[0], 1234)
 			},
-			assert: func(t *testing.T, tn *datastructures.TrieNode[rune, int]) {
-				test := []rune("test")
+			assert: func(t *testing.T, tn *datastructures.TrieNode[rune, int], args ...[]rune) {
+				test := args[0]
 				for i := range test[:len(test)-1] {
 					actual := tn.Find(test[:i+1])
 					t.Log(test[:i+1])
@@ -57,10 +58,10 @@ func TestTrie(t *testing.T) {
 			root := datastructures.NewTrie[rune, int](rune(0), nil)
 
 			if tc.before != nil {
-				tc.before(t, root)
+				tc.before(t, root, tc.args...)
 			}
 
-			tc.assert(t, root)
+			tc.assert(t, root, tc.args...)
 		})
 	}
 }
