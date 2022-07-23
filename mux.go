@@ -18,27 +18,25 @@ func NewMux() *mux {
 }
 
 func (m *mux) Add(method string, pattern string, handler Handler) {
-	var fullPattern = make([]string, 0)
-	fullPattern = append(fullPattern, strings.ToUpper(method))
-	urlPatterns := strings.SplitAfter(pattern, "/")
-	if urlPatterns[len(urlPatterns)-1] == "" {
-		urlPatterns = urlPatterns[:len(urlPatterns)-1]
-	}
-	fullPattern = append(fullPattern, urlPatterns...)
+	fullPattern := m.methodAndRouteToArray(method, pattern)
 	m.trie.Insert(fullPattern, handler)
 }
 
 func (m *mux) Search(method string, route string) Handler {
-	var fullPattern = make([]string, 0)
+	fullPattern := m.methodAndRouteToArray(method, route)
+	if node := m.trie.Find(fullPattern); node != nil {
+		return *node.Value
+	}
+	return NotFoundHandler
+}
+
+func (m *mux) methodAndRouteToArray(method string, route string) []string {
+	var fullPattern = []string{}
 	fullPattern = append(fullPattern, strings.ToUpper(method))
 	urlPatterns := strings.SplitAfter(route, "/")
 	if urlPatterns[len(urlPatterns)-1] == "" {
 		urlPatterns = urlPatterns[:len(urlPatterns)-1]
 	}
 	fullPattern = append(fullPattern, urlPatterns...)
-
-	if node := m.trie.Find(fullPattern); node != nil {
-		return *node.Value
-	}
-	return NotFoundHandler
+	return fullPattern
 }
