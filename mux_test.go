@@ -2,10 +2,9 @@ package jttp
 
 import (
 	"net/http"
-	"reflect"
-	"runtime"
 	"testing"
 
+	assertutils "github.com/eduardoths/jttp/internal/assert_utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -120,10 +119,7 @@ func TestMux_Search(t *testing.T) {
 				mux.Add(insert.method, insert.pattern, insert.handler)
 			}
 			actual := mux.Search(scenario.in.method, scenario.in.route)
-
-			wantPointer := runtime.FuncForPC(reflect.ValueOf(scenario.want).Pointer()).Name()
-			actualPointer := runtime.FuncForPC(reflect.ValueOf(actual).Pointer()).Name()
-			assert.Equal(t, wantPointer, actualPointer)
+			assertutils.AssertFunc(t, scenario.want, actual, "handler doesn't match")
 		})
 	}
 }
