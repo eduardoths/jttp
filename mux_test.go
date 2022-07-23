@@ -2,6 +2,8 @@ package jttp
 
 import (
 	"net/http"
+	"reflect"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -62,4 +64,55 @@ func TestMux_Add(t *testing.T) {
 		})
 	}
 
+}
+
+func TestMux_Search(t *testing.T) {
+	type inserts struct {
+		method  string
+		pattern string
+		handler Handler
+	}
+
+	type input struct {
+		method string
+		route  string
+	}
+
+	type testCase struct {
+		it      string
+		inserts []inserts
+		in      input
+		want    Handler
+	}
+
+	var secondTestWantFunc = func() {}
+	testCases := []testCase{
+		{
+			it:      "Should return not found handler",
+			inserts: []inserts{},
+			want:    NotFoundHandler,
+		},
+		{
+			it: "Sould return the same handler",
+			inserts: []inserts{
+				{http.MethodPost, "/", secondTestWantFunc},
+			},
+			in:   input{http.MethodPost, "/"},
+			want: secondTestWantFunc,
+		},
+	}
+
+	for _, scenario := range testCases {
+		t.Run(scenario.it, func(t *testing.T) {
+			mux := NewMux()
+			for _, insert := range scenario.inserts {
+				mux.Add(insert.method, insert.pattern, insert.handler)
+			}
+			actual := mux.Search(scenario.in.method, scenario.in.route)
+
+			wantPointer := runtime.FuncForPC(reflect.ValueOf(scenario.want).Pointer()).Name()
+			actualPointer := runtime.FuncForPC(reflect.ValueOf(actual).Pointer()).Name()
+			assert.Equal(t, wantPointer, actualPointer)
+		})
+	}
 }

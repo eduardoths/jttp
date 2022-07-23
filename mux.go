@@ -27,3 +27,18 @@ func (m *mux) Add(method string, pattern string, handler Handler) {
 	fullPattern = append(fullPattern, urlPatterns...)
 	m.trie.Insert(fullPattern, handler)
 }
+
+func (m *mux) Search(method string, route string) Handler {
+	var fullPattern = make([]string, 0)
+	fullPattern = append(fullPattern, strings.ToUpper(method))
+	urlPatterns := strings.SplitAfter(route, "/")
+	if urlPatterns[len(urlPatterns)-1] == "" {
+		urlPatterns = urlPatterns[:len(urlPatterns)-1]
+	}
+	fullPattern = append(fullPattern, urlPatterns...)
+
+	if node := m.trie.Find(fullPattern); node != nil {
+		return *node.Value
+	}
+	return NotFoundHandler
+}
