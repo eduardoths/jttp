@@ -23,9 +23,18 @@ func (m *mux) Add(method string, pattern string, handler Handler) {
 }
 
 func (m *mux) Search(method string, route string) Handler {
-	fullPattern := m.methodAndRouteToArray(method, route)
-	if node := m.trie.Find(fullPattern); node != nil {
+	splittenRoute := m.methodAndRouteToArray(method, route)
+	// pure text patterns
+	if node := m.trie.Find(splittenRoute); node != nil {
 		return *node.Value
+	}
+	closestMatch := m.trie.ClosestMatch(splittenRoute)
+	node := m.trie.Find(closestMatch)
+	for k, v := range node.Children {
+		isPatternSubstring := strings.HasPrefix(k, ":")
+		if isPatternSubstring {
+			return *v.Value
+		}
 	}
 	return NotFoundHandler
 }

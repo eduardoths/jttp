@@ -110,6 +110,14 @@ func TestMux_Search(t *testing.T) {
 			in:   input{http.MethodPatch, "/"},
 			want: wantFunc,
 		},
+		{
+			it: "Should find by pattern",
+			inserts: []inserts{
+				{http.MethodPost, "/:id", wantFunc},
+			},
+			in:   input{http.MethodPost, "/exemplo"},
+			want: wantFunc,
+		},
 	}
 
 	for _, scenario := range testCases {
