@@ -253,12 +253,20 @@ func TestTrie_ClosestMatch(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			it: "Should find closes match to string",
+			it: "Should find closest match to string",
 			inserts: []insert{
 				{[]string{"pattern", ":variable"}, 0},
 			},
 			in:   []string{"pattern", "xpto"},
 			want: []string{"pattern"},
+		},
+		{
+			it: "Should match",
+			inserts: []insert{
+				{[]string{"pattern", "xpto"}, 0},
+			},
+			in:   []string{"pattern", "xpto"},
+			want: []string{"pattern", "xpto"},
 		},
 	}
 
