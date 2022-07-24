@@ -31,20 +31,26 @@ func (m *mux) Search(method string, route string) Handler {
 		return *node.Value
 	}
 
-	if handler := m.searchAfterPattern(m.trie, splittenRoute); handler != nil {
+	if handler := m.searchAfterPattern(splittenRoute); handler != nil {
 		return handler
 	}
 
 	return NotFoundHandler
 }
 
-func (m *mux) searchAfterPattern(currentNode *datastructures.TrieNode[string, Handler], url []string) Handler {
+func (m *mux) searchAfterPattern(url []string) Handler {
 	closestMatch := m.trie.ClosestMatch(url)
-	node := m.trie.Find(closestMatch)
-	for k, v := range node.Children {
+	closestNode := m.trie.Find(closestMatch)
+	if len(url) == len(closestMatch) {
+		return *closestNode.Value
+	}
+	lengthTillPattern := len(closestMatch)
+
+	for k := range closestNode.Children {
 		isPatternSubstring := strings.HasPrefix(k, ":")
 		if isPatternSubstring {
-			return *v.Value
+			url[lengthTillPattern] = k
+			return m.searchAfterPattern(url)
 		}
 	}
 	return nil

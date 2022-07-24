@@ -118,6 +118,22 @@ func TestMux_Search(t *testing.T) {
 			in:   input{http.MethodPost, "/exemplo"},
 			want: wantFunc,
 		},
+		{
+			it: "Should find by pattern if it has a normal string after it",
+			inserts: []inserts{
+				{http.MethodPost, "/group/:id/test", wantFunc},
+			},
+			in:   input{http.MethodPost, "/group/1/test"},
+			want: wantFunc,
+		},
+		{
+			it: "Should be able to find if route has multiple patterns",
+			inserts: []inserts{
+				{http.MethodPost, "/group/:id/test/:date", wantFunc},
+			},
+			in:   input{http.MethodPost, "/group/1/test/12-07-2022"},
+			want: wantFunc,
+		},
 	}
 
 	for _, scenario := range testCases {
