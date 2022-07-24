@@ -6,6 +6,8 @@ import (
 	datastructures "github.com/eduardoths/jttp/internal/data_structures"
 )
 
+type muxNode *datastructures.TrieNode[string, Handler]
+
 type mux struct {
 	trie *datastructures.TrieNode[string, Handler]
 }
@@ -28,7 +30,16 @@ func (m *mux) Search(method string, route string) Handler {
 	if node := m.trie.Find(splittenRoute); node != nil {
 		return *node.Value
 	}
-	closestMatch := m.trie.ClosestMatch(splittenRoute)
+
+	if handler := m.searchAfterPattern(m.trie, splittenRoute); handler != nil {
+		return handler
+	}
+
+	return NotFoundHandler
+}
+
+func (m *mux) searchAfterPattern(currentNode *datastructures.TrieNode[string, Handler], url []string) Handler {
+	closestMatch := m.trie.ClosestMatch(url)
 	node := m.trie.Find(closestMatch)
 	for k, v := range node.Children {
 		isPatternSubstring := strings.HasPrefix(k, ":")
@@ -36,7 +47,7 @@ func (m *mux) Search(method string, route string) Handler {
 			return *v.Value
 		}
 	}
-	return NotFoundHandler
+	return nil
 }
 
 func (m *mux) methodAndRouteToArray(method string, route string) []string {
