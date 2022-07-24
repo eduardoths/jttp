@@ -237,3 +237,40 @@ func TestTrie_Find(t *testing.T) {
 		})
 	}
 }
+
+func TestTrie_ClosestMatch(t *testing.T) {
+	type insert struct {
+		key   []string
+		value int
+	}
+
+	type testCase struct {
+		it      string
+		inserts []insert
+		in      []string
+		want    []string
+	}
+
+	testCases := []testCase{
+		{
+			it: "Should find closes match to string",
+			inserts: []insert{
+				{[]string{"pattern", ":variable"}, 0},
+			},
+			in:   []string{"pattern", "xpto"},
+			want: []string{"pattern"},
+		},
+	}
+
+	for _, scenario := range testCases {
+		t.Run(scenario.it, func(t *testing.T) {
+			root := datastructures.NewTrie[string, int]("", nil)
+			for _, insert := range scenario.inserts {
+				root.Insert(insert.key, insert.value)
+			}
+
+			actual := root.ClosestMatch(scenario.in)
+			assert.Equal(t, scenario.want, actual)
+		})
+	}
+}

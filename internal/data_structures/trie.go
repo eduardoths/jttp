@@ -38,3 +38,16 @@ func (tn *TrieNode[K, V]) Insert(key []K, value V) {
 	x.Value = &value
 	x.IsTerminal = true
 }
+
+func (tn *TrieNode[K, V]) ClosestMatch(key []K) []K {
+	keys := []K{}
+	x := tn
+	for i := 0; i < len(key); i++ {
+		if x.Children[key[i]] == nil {
+			return keys
+		}
+		keys = append(keys, key[i])
+		x = x.Children[key[i]]
+	}
+	return keys
+}
